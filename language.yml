@@ -1,0 +1,53 @@
+resources:
+  Resources:
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: language_list
+        AttributeDefinitions:
+          - AttributeName:
+            AttributeType: 
+        KeySchema:
+          - AttributeName: language_code
+            KeyType: string
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+ 
+  extensions:
+    # override Properties or other attributes of Framework-created resources.
+    # See https://serverless.com/framework/docs/providers/aws/guide/resources#override-aws-cloudformation-resource for more details
+    UsersCreateLogGroup:
+      Properties:
+        RetentionInDays: '30'
+ 
+  # The "Outputs" that your AWS CloudFormation Stack should produce.  This allows references between services.
+  Outputs:
+    UsersTableArn:
+      Description: The ARN for the User's Table
+      Value: !GetAtt usersTable.Arn
+      Export:
+        # see Fn::ImportValue to use in other services
+        # and http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html for documentation on use.
+        Name: ${self:service}:${sls:stage}:UsersTableArninstall:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+      - echo use node 8.11.3
+      - export NVM_DIR=~/.nvm && source ~/.nvm/nvm.sh && nvm install 8.11.3
+      - echo use npm 3.10.10
+      - npm install -g npm@3.10.10
+      - echo Install npm dependencies
+      - npm install iso-639-1
+      - gem install rake
+  build:
+    commands:
+      - echo Running Test
+      - npm run test
+  post_build:
+    commands:
+      - ./node_modules/.bin/codecov -f coverage/*.json
+npm install iso-639-1
+console.log(ISO6391.getcode('en')); 
+console.log(ISO6391.getName('english'));
